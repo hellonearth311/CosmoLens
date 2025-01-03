@@ -20,4 +20,7 @@ Now, you can customize the settings as you want. Below is the explanation for ea
 `hd_photos`: Fetch HD photos from the NASA APOD API when available. <br>
 `theme`: To use dark, light, or system theme for the app. <br>
 `api_key`: The most **important** setting. Paste your NASA API key here. If you don't, the app **won't** work. <br>
-`colored_console_text`: Print out colored text in the debug console.
+`colored_console_text`: Print out colored text in the debug console. <br>
+
+### BuT wHY dOn'T yOu jUsT inCLuDe tHe sETtinGs fIlE iN tHe rEpO?
+I don't include it in the repo because the settings file contains the `api_key` setting, and including it would mean giving away my API key for free, which is NOT happening.
