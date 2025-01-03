@@ -1,3 +1,4 @@
+# *THIS IS A WORK IN PROGRESS. IF YOU TRY TO INSTALL IT NOW, NOTHING WILL HAPPEN*
 # CosmoLens
 CosmoLens is the perfect tool for fetching exoplanet data from NASA's exoplanet archive API. <br>
 It even shows you the APOD (Astrology Picture of the Day), using NASA's APOD API. <br>
@@ -24,3 +25,6 @@ Now, you can customize the settings as you want. Below is the explanation for ea
 
 ### BuT wHY dOn'T yOu jUsT inCLuDe tHe sETtinGs fIlE iN tHe rEpO?
 I don't include it in the repo because the settings file contains the `api_key` setting, and including it would mean giving away my API key for free, which is NOT happening.
+
+### What next?
+Now, just run `main.py`, and you should be good to go!
