@@ -13,12 +13,23 @@ HD_PHOTOS = settings["hd_photos"]
 COLORED_TEXT = settings["colored_text"]
 
 # print remaining requests
-def print_remaining_requests(response):
+def print_remaining_requests():
     """
-    Use the response argument to find the amount of remaining requests the specified API key has for the hour.
-    :param response: Response returned by any of the responses from NASA APIs.
+    Uses a dummy API o find the amount of remaining requests the specified API key has for the hour.
     :return: Number of requests left for the hour.
     """
+
+    # use a dummy api call to find the number of requests left
+    url = f"https://api.nasa.gov/planetary/apod?api_key={API_KEY}&date=2000-01-01"
+
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        if COLORED_TEXT:
+            print(Fore.RED + "Remaining requests for the hour: 0" + Style.RESET_ALL)
+        else:
+            print("Remaining requests for the hour: 0")
+        return
 
     # Grab the number of requests from the response
     remaining_requests = response.headers.get("X-RateLimit-Remaining", "Unknown")
@@ -47,11 +58,14 @@ def fetch_exoplanet_data(planet_name):
     :return: Dictionary containing the planet's data or an error message
     """
 
+    # TODO: Fix this garbage API call that doesn't work :(
+
     # Base URL
     url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
 
     # SQL query to search for planet name
-    query = f"SELECT * FROM ps WHERE pl_name = '{planet_name}'"
+    query = f"SELECT * FROM ps WHERE TRIM(pl_name) = TRIM(f{planet_name.upper()})"
+    # query = f"SELECT TOP 10 * FROM ps"
 
     # params to the api
     params = {
@@ -61,8 +75,9 @@ def fetch_exoplanet_data(planet_name):
 
     # data pls
     response = requests.get(url, params=params)
+    print(response.text)
 
-    print_remaining_requests(response)
+    print_remaining_requests()
 
     if response.status_code == 200:
         # oh yeah, les goooooooooo
@@ -90,6 +105,7 @@ def fetch_apod():
     print(url)
 
     response = requests.get(url)
+    print_remaining_requests()
 
     # did it work
     if response.status_code == 200:
@@ -100,7 +116,6 @@ def fetch_apod():
         explanation = data["explanation"]
 
         # Get remaining requests from headers
-        print_remaining_requests(response)
 
         return image_url, explanation
     else:
@@ -111,7 +126,6 @@ def fetch_apod():
         else:
             print(f"Error fetching data from NASA APOD API: Error {response.status_code}. Perhaps your API key is incorrect / out of requests?")
 
-        print_remaining_requests(response)
         return None, None
 
 
@@ -120,4 +134,7 @@ def pick_space_fact():
     with open("data/space_facts.txt", "r") as f:
         return r.choice(f.readlines()).strip()
 
-print(fetch_apod())
+
+# Some test cases
+if __name__ == "__main__":
+    print(fetch_exoplanet_data("OGLE-TR-10"))
