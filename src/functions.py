@@ -6,7 +6,7 @@ import pandas as pd
 import os
 
 # load up the settings json file
-with open("settings.json", "r") as f:
+with open("../settings.json", "r") as f:
     settings = json.load(f)
 
 # declare some variables for the settings
@@ -192,10 +192,10 @@ def fetch_apod():
 
 # pick a random space fact from the txt file (yes i used chatgpt for the facts, what u gonna do)
 def pick_space_fact():
-    with open("data/space_facts.txt", "r") as f:
+    with open("../data/space_facts.txt", "r") as f:
         return r.choice(f.readlines()).strip()
 
 
 # Some test cases
 if __name__ == "__main__":
-    fetch_all_exoplanet_data_to_csv("data/exoplanets.csv")
+    fetch_all_exoplanet_data_to_csv("../data/exoplanets.csv")
