@@ -86,7 +86,7 @@ def fetch_all_exoplanet_data_to_csv(output_file="all_exoplanets.csv", clean_data
         }
 
         try:
-            # Send the GET request
+            # Send the GET request (this takes 7 fucking years for some dumbass reason)
             print_colored("Fetching data from API...", Fore.CYAN)
             response = requests.get(url, params=params)
             print_remaining_requests()  # Monitor API usage
@@ -107,6 +107,13 @@ def fetch_all_exoplanet_data_to_csv(output_file="all_exoplanets.csv", clean_data
                     df.to_csv(output_file, index=False)
 
                     print_colored(f"Data for all exoplanets saved to {output_file}. Total records: {len(data)}", Fore.GREEN)
+
+                    if clean_data:
+                        print_colored("clean_data=True, cleaning data!", Fore.CYAN)
+                        clean_exoplanet_data(output_file)
+                        print_colored("Data cleaned and written successfully.", Fore.GREEN)
+                    else:
+                        return
                 else:
                     print_colored("No data found in the NASA Exoplanet Archive.", Fore.LIGHTRED_EX)
             else:
@@ -114,7 +121,7 @@ def fetch_all_exoplanet_data_to_csv(output_file="all_exoplanets.csv", clean_data
         except Exception as e:
             print_colored(f"An error occurred while fetching data: {str(e)}. Perhaps your API key is incorrect / out of requests?", Fore.RED)
 
-def clean_exoplanet_data(input_file="all_exoplanets.csv", output_file="all_exoplanets.csv"):
+def clean_exoplanet_data(input_file, output_file):
     """
     Clean the exoplanet data by keeping only relevant columns and save it to a new CSV file.
     :param input_file: The CSV file containing the full exoplanet dataset (default: all_exoplanets.csv).
@@ -135,7 +142,7 @@ def clean_exoplanet_data(input_file="all_exoplanets.csv", output_file="all_exopl
         'st_mass',  # Host star mass (solar masses)
         'st_rad',  # Host star radius (solar radii)
         'discoverymethod',  # Discovery method
-        'discoveryyear',  # Year of discovery
+        'disc_year',  # Year of discovery
     ]
 
     try:
@@ -150,11 +157,11 @@ def clean_exoplanet_data(input_file="all_exoplanets.csv", output_file="all_exopl
 
         print_colored(f"Cleaned data has been saved to {output_file}. Total records: {len(cleaned_df)}", Fore.GREEN)
     except FileNotFoundError:
-        print(f"Error: The file '{input_file}' does not exist.", Fore.YELLOW)
+        print_colored(f"Error: The file '{input_file}' does not exist.", Fore.YELLOW)
     except KeyError as e:
-        print(f"Error: Some columns were not found in the dataset. Missing column(s): {str(e)}", Fore.LIGHTYELLOW_EX)
+        print_colored(f"Error: Some columns were not found in the dataset. Missing column(s): {str(e)}", Fore.LIGHTYELLOW_EX)
     except Exception as e:
-        print(f"An error occurred while cleaning the data: {str(e)}", Fore.RED)
+        print_colored(f"An error occurred while cleaning the data: {str(e)}", Fore.RED)
 
 
 # grab a sweet, sweet, apod from the nasa api
@@ -195,7 +202,60 @@ def pick_space_fact():
     with open("../data/space_facts.txt", "r") as f:
         return r.choice(f.readlines()).strip()
 
+# look up exoplanets from the dataset [i also used chatgpt for the docstring :])
+def lookUpExoplanets(search, search_type):
+    """
+    Searches the exoplanet dataset for entries matching the specified criteria.
+
+    This function retrieves exoplanet data from the dataset previously downloaded by the
+    `fetch_all_exoplanet_data_to_csv()` function. It supports searching by various criteria,
+    such as exoplanet name, discovery year, host star name, or discovery method.
+
+    Args:
+        search (str): The search term used to filter the exoplanet dataset. The data type
+                             depends on the `search_type` specified.
+        search_type (str): The type of search to perform. Valid options include:
+                           - 'name': Search by exoplanet name.
+                           - 'disc_year': Search by the year the exoplanet was discovered.
+                           - 'hostname': Search by the name of the host star.
+                           - 'discoverymethod': Search by the method used to discover the exoplanet.
+
+    Returns:
+        list: A list of exoplanets that match the specified search criteria. Each entry in the list
+              contains detailed information about the exoplanet, including its properties and discovery data.
+
+    Raises:
+        ValueError: If an invalid `search_type` is provided or if the search term does not match any entries.
+    """
+    valid_search_types = ['name', 'disc_year', 'hostname', 'discoverymethod']
+    if search_type not in valid_search_types:
+        raise ValueError(f"Invalid search_type: {search_type}. Valid options are: {', '.join(valid_search_types)}")
+
+    dataset = pd.read_csv("../data/exoplanets.csv")
+
+    # if statements are for sore losers
+    match search_type:
+        case 'name':
+            filtered_dataset = dataset[dataset['pl_name'].str.contains(search, case=False)]
+        case 'disc_year':
+            filtered_dataset = dataset[dataset['disc_year'] == search]
+        case 'hostname':
+            filtered_dataset = dataset[dataset['hostname'].str.contains(search, case=False)]
+        case 'discoverymethod':
+            filtered_dataset = dataset[dataset['discoverymethod'].str.contains(search, case=False)]
+        case _:
+            raise ValueError(f"Invalid search_type: {search_type}. Valid options are: {', '.join(valid_search_types)}")
+
+    return filtered_dataset.to_dict(orient='records')
+
+
 
 # Some test cases
 if __name__ == "__main__":
-    fetch_all_exoplanet_data_to_csv("../data/exoplanets.csv")
+    fetch_all_exoplanet_data_to_csv("../data/exoplanets.csv", True)
+    print(pick_space_fact())
+    print(lookUpExoplanets("trinity", "name"))
+    print(lookUpExoplanets("2023", "disc_year"))
+    print(lookUpExoplanets("trinity", "hostname"))
+    print(lookUpExoplanets("transit", "discoverymethod"))
+    print(fetch_apod())
