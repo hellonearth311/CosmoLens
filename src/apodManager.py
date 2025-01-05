@@ -32,7 +32,11 @@ def fetch_apod():
 
         return None, None
 
-def download_image_from_url(image_url, path_to_save):
-    img_data = requests.get(image_url).content
-    with open(path_to_save, 'wb') as handler:
-        handler.write(img_data)
+def download_image_from_url(url, file_path):
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(file_path, 'wb') as f:
+            for chunk in response:
+                f.write(chunk)
+    else:
+        raise Exception(f"Failed to download image with status code {response.status_code}")

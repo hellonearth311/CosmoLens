@@ -1,5 +1,7 @@
 import random as r
 import json
+import webbrowser
+
 import requests
 import pandas as pd
 import os
@@ -69,3 +71,6 @@ def pick_space_fact():
 # get current date (this is honestly just bc im too lazy hehe)
 def get_current_date():
     return datetime.now().strftime("%d %B %Y")
+
+def callback(url):
+    webbrowser.open_new(url)

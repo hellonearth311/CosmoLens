@@ -1,3 +1,5 @@
+import os.path
+
 from apodManager import *
 from exoplanetManager import *
 from functions import *
@@ -209,17 +211,33 @@ apodDescriptionLabel.place(relx=0.77, rely=0.65, anchor=CENTER)
 # fetch and download the apod
 apodImageURL, apodDesc = fetch_apod()
 
-download_image_from_url(apodImageURL, '../assets/apod.png')
+download_image_from_url(apodImageURL, '../assets/apod.jpeg')
 
-# load the downloaded image
-apodImage = Image.open('../assets/apod.png')
-apodImage = apodImage.resize((350, 350))
+# aaaah just work pls
+print_colored(f"File size: {os.path.getsize(f'../assets/apod.jpeg')}", Fore.LIGHTYELLOW_EX)
 
-apodImagePhoto = ImageTk.PhotoImage(apodImage)
+# omfg the fucking apod is a YOUTUBE VIDEO BRO WHY
+print_colored(apodImageURL, Fore.LIGHTBLUE_EX)
 
-# display it
-apodImageLabel = CTkLabel(root, image=apodImagePhoto, text="")
-apodImageLabel.place(relx=0.77, rely=0.37, anchor=CENTER)
+# load the downloaded image and display
+try:
+    apodImage = Image.open('../assets/apod.jpeg')
+    apodImage = apodImage.resize((350, 350))
+
+    apodImagePhoto = ImageTk.PhotoImage(apodImage)
+
+    # display it
+    apodImageLabel = CTkLabel(root, image=apodImagePhoto, text="")
+    apodImageLabel.place(relx=0.77, rely=0.37, anchor=CENTER)
+except:
+    # bruh its a video :(
+    print_colored(f"APOD for today is a video at URL {apodImageURL}", Fore.GREEN)
+
+    apodImageLabel = CTkLabel(root, text=f"Today's APOD is a YouTube™ video at {apodImageURL}. Sorry!", font=("Futura", 30), text_color=darkest, wraplength=350, cursor="target")
+    apodImageLabel.place(relx=0.77, rely=0.37, anchor=CENTER)
+    apodImageLabel.bind("<Button-1>", lambda hehe: callback(apodImageURL))
+
+    apodDescriptionLabel.configure(text=f"The NASA APOD for {get_current_date()}. Click it to view the video.")
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------- #
 # credit label (man i just gonna fill this shiz up bro)
